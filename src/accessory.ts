@@ -20,7 +20,7 @@ export class MiAccessory {
   }
 
   makeService(serviceType) {
-    let service = this.accessory.getService(serviceType) || this.accessory.addService(serviceType);
+    const service = this.accessory.getService(serviceType) || this.accessory.addService(serviceType);
     service.setCharacteristic(this.platform.Characteristic.Name, this.config().displayName);
     return service;
   }

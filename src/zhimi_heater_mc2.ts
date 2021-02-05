@@ -6,10 +6,10 @@ import { MiDevice } from './miDevice';
 
 export class zhimi_heater_mc2 extends MiAccessory {
   private service: Service;
-  private power: boolean = false;
-  private target_temperature: number = 28;
-  private current_temperature: number = 21;
-  private child_lock: boolean = false; 
+  private power = false;
+  private target_temperature = 28;
+  private current_temperature = 21;
+  private child_lock = false; 
 
   constructor(
     info,
@@ -96,7 +96,7 @@ export class zhimi_heater_mc2 extends MiAccessory {
       this.service.updateCharacteristic(this.platform.Characteristic.HeatingThresholdTemperature, this.target_temperature);
       this.service.updateCharacteristic(this.platform.Characteristic.CurrentTemperature, this.current_temperature);
       this.service.updateCharacteristic(this.platform.Characteristic.LockPhysicalControls, this.child_lock ? this.platform.Characteristic.LockPhysicalControls.CONTROL_LOCK_ENABLED : this.platform.Characteristic.LockPhysicalControls.CONTROL_LOCK_DISABLED);
-    }).catch((err) => { this.platform.log.error(err.message); });;
+    }).catch((err) => { this.platform.log.error(err.message); });
   }
  
   setHeatingThresholdTemperature(value: CharacteristicValue, callback: CharacteristicSetCallback) {

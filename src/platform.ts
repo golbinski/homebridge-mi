@@ -71,7 +71,7 @@ export class MiPlatform implements DynamicPlatformPlugin {
   }
 
   createAccessory(platform: MiPlatform, accessory: PlatformAccessory) {
-    let device = new MiDevice(
+    const device = new MiDevice(
       accessory.context.device.ipAddress,
       54321,
       accessory.context.device.token,
@@ -91,7 +91,7 @@ export class MiPlatform implements DynamicPlatformPlugin {
   }
 
   unregisterNotUsedDevices() {
-    let configuredAccessories : string[] = []
+    const configuredAccessories : string[] = []
     for (const accessory of this.miAccessories) {
       configuredAccessories.push(accessory.uuid());
     }

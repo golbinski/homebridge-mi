@@ -52,8 +52,8 @@ class MiTransaction {
 // TODO: extract header encoding/decoding to separate class
 class MiSocket {
   private socket : dgram.Socket;
-  private deviceId : number = 0;
-  private lastStamp : number = 0;
+  private deviceId = 0;
+  private lastStamp = 0;
   private transaction : MiTransaction | null = null;
 
   constructor(
@@ -106,7 +106,7 @@ class MiSocket {
         currentTransaction.enqueue(nextTransaction);
       });
     }
-    let newTransaction = new MiTransaction(this);
+    const newTransaction = new MiTransaction(this);
     this.transaction = newTransaction;
     return new Promise<MiTransaction>((resolve, reject) => {
       if (this.lastStamp === 0) {
@@ -124,7 +124,7 @@ class MiSocket {
             reject(err);
           }
         });  
-        let handshake = Buffer.alloc(32, 0xff);
+        const handshake = Buffer.alloc(32, 0xff);
         handshake[0] = 0x21;
         handshake[1] = 0x31;
         handshake.writeUInt16BE(32, 2);
@@ -173,7 +173,7 @@ class MiSocket {
     if (this.deviceId === 0 || this.lastStamp === 0) {
       throw new Error('deviceId or device stamp not available');
     }
-    let header = Buffer.alloc(32, 0x00);
+    const header = Buffer.alloc(32, 0x00);
     header[0] = 0x21;
     header[1] = 0x31;
     header.writeUInt32BE(this.deviceId, 8);
@@ -216,7 +216,7 @@ export class MiDevice {
   private token : Buffer;
   private tokenKey : Buffer;
   private tokenIV : Buffer;
-  private lastId : number = 0;
+  private lastId = 0;
   private socket : MiSocket;
 
   constructor(
@@ -264,7 +264,7 @@ export class MiDevice {
   }     
 
   private encode(buf: Buffer) {
-    let cipher = crypto.createCipheriv('aes-128-cbc', this.tokenKey, this.tokenIV);
+    const cipher = crypto.createCipheriv('aes-128-cbc', this.tokenKey, this.tokenIV);
     return Buffer.concat([
       cipher.update(buf),
       cipher.final(),
@@ -272,31 +272,8 @@ export class MiDevice {
   }
 
   private decode(buf: Buffer) {
-    let decipher = crypto.createDecipheriv('aes-128-cbc', this.tokenKey, this.tokenIV);
-    return this.parseData(Buffer.concat([decipher.update(buf), decipher.final()]));
-  }
-
-  private parseObject(str : string) {
-    try {
-      return JSON.parse(str);
-    } catch(error) {
-      // Case 1: Load for subdevices fail as they return empty values
-      str = str.replace('[,]', '[null,null]');
-      // for aqara body sensor (lumi.motion.aq2)
-      str = str.replace('[,,]', '[null,null,null]');
-
-      return JSON.parse(str);
-    }
-  }
-
-  private parseData(data) {
-    if (data[data.length - 1] === 0) {
-      data = data.slice(0, data.length - 1);
-    }
-    let strData = data.toString('utf8');
-    // Remove non-printable characters to help with invalid JSON from devices
-    strData = strData.replace(/[\x00-\x09\x0B-\x0C\x0E-\x1F\x7F-\x9F]/g, ''); 
-    const json = this.parseObject(strData);
-    return json;
+    const decipher = crypto.createDecipheriv('aes-128-cbc', this.tokenKey, this.tokenIV);
+    const json = Buffer.concat([decipher.update(buf), decipher.final()]);
+    return JSON.parse(json.toString('utf8'));
   }
 }

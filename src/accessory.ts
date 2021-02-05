@@ -1,4 +1,4 @@
-import { Service, PlatformAccessory, CharacteristicValue, CharacteristicSetCallback, CharacteristicGetCallback } from 'homebridge';
+import { PlatformAccessory } from 'homebridge';
 import { MiPlatform } from './platform';
 import { MiDevice } from './miDevice';
 

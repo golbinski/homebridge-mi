@@ -60,7 +60,7 @@ class MiSocket {
       private readonly token: Buffer,
   ) {
     this.socket = dgram.createSocket('udp4');
-    this.socket.on('message', (msg, rinfo) => {
+    this.socket.on('message', (msg) => {
       const m = this.dump(msg);
       this.deviceId = m.header.device_id;
       if (m.header.stamp > this.lastStamp) {
@@ -98,7 +98,7 @@ class MiSocket {
 
   executeTransaction() {
     if (this.transaction !== null) {
-      return new Promise<MiTransaction>((resolve, reject) => {
+      return new Promise<MiTransaction>((resolve) => {
         const currentTransaction = this.transaction as MiTransaction;
         const nextTransaction = new MiTransaction(this, resolve);
         currentTransaction.enqueue(nextTransaction);
@@ -111,7 +111,7 @@ class MiSocket {
         const timeout = setTimeout(() => {
           reject('timeout'); 
         }, 10000);
-        this.socket.once('message', (msg, rinfo) => {
+        this.socket.once('message', (msg) => {
           clearTimeout(timeout);
           try {
             const payload = this.decode(msg);
@@ -142,11 +142,11 @@ class MiSocket {
   } 
 
   send(buf) {
-    return new Promise<any>((resolve, reject) => {
+    return new Promise<Buffer>((resolve, reject) => {
       const timeout = setTimeout(() => {
         reject(new Error('timeout')); 
       }, 10000);
-      this.socket.once('message', (msg, rinfo) => {
+      this.socket.once('message', (msg) => {
         clearTimeout(timeout);
         try {
           const payload = this.decode(msg);
@@ -168,7 +168,7 @@ class MiSocket {
   }
 
   private send_buffer(buf: Buffer) {
-    this.socket.send(buf, this.port, this.address, (err) => {
+    this.socket.send(buf, this.port, this.address, () => {
       this.socket.emit('sent', buf);
     });
   } 
@@ -245,7 +245,7 @@ export class MiDevice {
   }
 
   send(method, args) {
-    return new Promise<any>((resolve, reject) => {
+    return new Promise<any>((resolve, reject) => {  /* eslint-disable-line @typescript-eslint/no-explicit-any */
       this.socket.executeTransaction().then((transaction) => {
         this.lastId += 1;
         if (this.lastId >= 10000) {

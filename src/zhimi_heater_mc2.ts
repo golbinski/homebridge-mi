@@ -90,14 +90,18 @@ export class zhimi_heater_mc2 extends MiAccessory {
       this.child_lock = result[3].value as boolean;
       if (this.power) {
         this.service.updateCharacteristic(this.platform.Characteristic.Active, this.platform.Characteristic.Active.ACTIVE);
-        this.service.updateCharacteristic(this.platform.Characteristic.CurrentHeaterCoolerState, this.platform.Characteristic.CurrentHeaterCoolerState.HEATING);
+        this.service.updateCharacteristic(this.platform.Characteristic.CurrentHeaterCoolerState,
+          this.platform.Characteristic.CurrentHeaterCoolerState.HEATING);
       } else {
         this.service.updateCharacteristic(this.platform.Characteristic.Active, this.platform.Characteristic.Active.INACTIVE);
-        this.service.updateCharacteristic(this.platform.Characteristic.CurrentHeaterCoolerState, this.platform.Characteristic.CurrentHeaterCoolerState.INACTIVE);
+        this.service.updateCharacteristic(this.platform.Characteristic.CurrentHeaterCoolerState,
+          this.platform.Characteristic.CurrentHeaterCoolerState.INACTIVE);
       }
       this.service.updateCharacteristic(this.platform.Characteristic.HeatingThresholdTemperature, this.target_temperature);
       this.service.updateCharacteristic(this.platform.Characteristic.CurrentTemperature, this.current_temperature);
-      this.service.updateCharacteristic(this.platform.Characteristic.LockPhysicalControls, this.child_lock ? this.platform.Characteristic.LockPhysicalControls.CONTROL_LOCK_ENABLED : this.platform.Characteristic.LockPhysicalControls.CONTROL_LOCK_DISABLED);
+      this.service.updateCharacteristic(this.platform.Characteristic.LockPhysicalControls,
+        this.child_lock ? this.platform.Characteristic.LockPhysicalControls.CONTROL_LOCK_ENABLED 
+          : this.platform.Characteristic.LockPhysicalControls.CONTROL_LOCK_DISABLED);
     }).catch((err) => {
       this.platform.log.error(err.message); 
     });
@@ -122,7 +126,8 @@ export class zhimi_heater_mc2 extends MiAccessory {
   }
 
   getCurrentHeaterCoolerState(callback: CharacteristicGetCallback) {
-    callback(null, this.power ? this.platform.Characteristic.CurrentHeaterCoolerState.HEATING : this.platform.Characteristic.CurrentHeaterCoolerState.INACTIVE);
+    callback(null, this.power ? this.platform.Characteristic.CurrentHeaterCoolerState.HEATING
+      : this.platform.Characteristic.CurrentHeaterCoolerState.INACTIVE);
   }
   
   getTargetHeaterCoolerState(callback: CharacteristicGetCallback) {
@@ -138,7 +143,8 @@ export class zhimi_heater_mc2 extends MiAccessory {
   }
 
   getLockPhysicalControls(callback: CharacteristicGetCallback) {
-    callback(null, this.child_lock ? this.platform.Characteristic.LockPhysicalControls.CONTROL_LOCK_ENABLED : this.platform.Characteristic.LockPhysicalControls.CONTROL_LOCK_DISABLED);
+    callback(null, this.child_lock ? this.platform.Characteristic.LockPhysicalControls.CONTROL_LOCK_ENABLED
+      : this.platform.Characteristic.LockPhysicalControls.CONTROL_LOCK_DISABLED);
   }
   
   setLockPhysicalControls(value: CharacteristicValue, callback: CharacteristicSetCallback) {

@@ -6,7 +6,7 @@ export class MiAccessory {
   constructor(
     protected readonly platform: MiPlatform,
     public readonly accessory: PlatformAccessory,
-    protected readonly api: MiDevice
+    protected readonly api: MiDevice,
   ) {
     this.platform.registerAccessory(this);
   }

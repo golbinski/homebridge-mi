@@ -15,7 +15,7 @@ export class zhimi_heater_mc2 extends MiAccessory {
     info,
     platform: MiPlatform,
     accessory: PlatformAccessory,
-    api: MiDevice
+    api: MiDevice,
   ) {
     super(platform, accessory, api);
     // set accessory information
@@ -30,12 +30,12 @@ export class zhimi_heater_mc2 extends MiAccessory {
       .on('get', this.getActive.bind(this));
     this.service.getCharacteristic(this.platform.Characteristic.CurrentHeaterCoolerState)
       .setProps({
-        validValues: [0, 2]
+        validValues: [0, 2],
       })
       .on('get', this.getCurrentHeaterCoolerState.bind(this));
     this.service.getCharacteristic(this.platform.Characteristic.TargetHeaterCoolerState)
       .setProps({
-        validValues: [1]
+        validValues: [1],
       })
       .on('set', this.setTargetHeaterCoolerState.bind(this))
       .on('get', this.getTargetHeaterCoolerState.bind(this));
@@ -43,14 +43,14 @@ export class zhimi_heater_mc2 extends MiAccessory {
       .setProps({
         minValue: 18,
         maxValue: 28,
-        minStep: 1
+        minStep: 1,
       })
       .on('set', this.setHeatingThresholdTemperature.bind(this))
       .on('get', this.getHeatingThresholdTemperature.bind(this));
     this.service.getCharacteristic(this.platform.Characteristic.CurrentTemperature)
       .setProps({
         minValue: -30,
-        maxValue: 100
+        maxValue: 100,
       })
       .on('get', this.getCurrentTemperature.bind(this));
     this.service.getCharacteristic(this.platform.Characteristic.LockPhysicalControls)
@@ -58,7 +58,7 @@ export class zhimi_heater_mc2 extends MiAccessory {
       .on('get', this.getLockPhysicalControls.bind(this));
     this.service.getCharacteristic(this.platform.Characteristic.TemperatureDisplayUnits)
       .setProps({
-        validValues: [this.platform.Characteristic.TemperatureDisplayUnits.CELSIUS]
+        validValues: [this.platform.Characteristic.TemperatureDisplayUnits.CELSIUS],
       });
   }
 
@@ -71,7 +71,9 @@ export class zhimi_heater_mc2 extends MiAccessory {
           callback(new Error(result[0].code as string));
         }
       })
-      .catch((err) => { callback(err); });
+      .catch((err) => {
+        callback(err); 
+      });
   }
 
   getActive(callback: CharacteristicGetCallback) {
@@ -80,7 +82,7 @@ export class zhimi_heater_mc2 extends MiAccessory {
       {did: 'power', siid: 2, piid: 1},
       {did: 'target_temperature', siid: 2, piid: 5},
       {did: 'temperature', siid: 4, piid: 7},
-      {did: 'child_lock', siid: 5, piid: 1}
+      {did: 'child_lock', siid: 5, piid: 1},
     ]).then((result) => {
       this.power = result[0].value as boolean;
       this.target_temperature = result[1].value as number;
@@ -96,7 +98,9 @@ export class zhimi_heater_mc2 extends MiAccessory {
       this.service.updateCharacteristic(this.platform.Characteristic.HeatingThresholdTemperature, this.target_temperature);
       this.service.updateCharacteristic(this.platform.Characteristic.CurrentTemperature, this.current_temperature);
       this.service.updateCharacteristic(this.platform.Characteristic.LockPhysicalControls, this.child_lock ? this.platform.Characteristic.LockPhysicalControls.CONTROL_LOCK_ENABLED : this.platform.Characteristic.LockPhysicalControls.CONTROL_LOCK_DISABLED);
-    }).catch((err) => { this.platform.log.error(err.message); });
+    }).catch((err) => {
+      this.platform.log.error(err.message); 
+    });
   }
  
   setHeatingThresholdTemperature(value: CharacteristicValue, callback: CharacteristicSetCallback) {
@@ -108,7 +112,9 @@ export class zhimi_heater_mc2 extends MiAccessory {
           callback(new Error(result[0].code as string));
         }
       })
-      .catch((err) => { callback(err); });
+      .catch((err) => {
+        callback(err); 
+      });
   }
 
   getHeatingThresholdTemperature(callback: CharacteristicGetCallback) {
@@ -144,6 +150,8 @@ export class zhimi_heater_mc2 extends MiAccessory {
           callback(new Error(result[0].code as string));
         }
       })
-      .catch((err) => { callback(err); });
+      .catch((err) => {
+        callback(err); 
+      });
   }
 }

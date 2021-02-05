@@ -6,13 +6,13 @@ import { MiDevice } from './miDevice';
 import { zhimi_heater_mc2 } from './zhimi_heater_mc2';
 
 export interface MiAccessoryConfig {
-  displayName: string,
-  ipAddress: string,
-  token: string
+  displayName: string;
+  ipAddress: string;
+  token: string;
 }
 
 interface MiOptions {
-  devices: MiAccessoryConfig[]
+  devices: MiAccessoryConfig[];
 }
 
 export interface AccessoryFactory<P extends DynamicPlatformPlugin> {
@@ -41,7 +41,7 @@ export class MiPlatform implements DynamicPlatformPlugin {
   ) {
 
     this.config = {
-      devices: config.devices as MiAccessoryConfig[]
+      devices: config.devices as MiAccessoryConfig[],
     };
 
     // When this event is fired it means Homebridge has restored all cached accessories from disk.
@@ -75,7 +75,7 @@ export class MiPlatform implements DynamicPlatformPlugin {
       accessory.context.device.ipAddress,
       54321,
       accessory.context.device.token,
-      platform.log
+      platform.log,
     );
     device.send('miIO.info', []).then((response) => {
       if (response.model === 'zhimi.heater.mc2') {
@@ -91,7 +91,7 @@ export class MiPlatform implements DynamicPlatformPlugin {
   }
 
   unregisterNotUsedDevices() {
-    const configuredAccessories : string[] = []
+    const configuredAccessories : string[] = [];
     for (const accessory of this.miAccessories) {
       configuredAccessories.push(accessory.uuid());
     }

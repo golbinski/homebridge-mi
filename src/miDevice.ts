@@ -2,15 +2,13 @@ import dgram from 'dgram';
 import crypto from 'crypto';
 import { Logger } from 'homebridge';
 
-export type RequestCallback = (error?: Error | null, value?: any) => void
-
-type ResolveHandle = (value?: MiTransaction | PromiseLike<MiTransaction>) => void 
+type ResolveHandle = (value?: MiTransaction | PromiseLike<MiTransaction>) => void; 
 class MiTransaction {
   private next : MiTransaction | null = null;
 
   constructor(
     private readonly socket : MiSocket,
-    private readonly notifier : ResolveHandle | null = null
+    private readonly notifier : ResolveHandle | null = null,
   ) {
   }
 
@@ -59,7 +57,7 @@ class MiSocket {
   constructor(
       private readonly address: string,
       private readonly port: number,
-      private readonly token: Buffer
+      private readonly token: Buffer,
   ) {
     this.socket = dgram.createSocket('udp4');
     this.socket.on('message', (msg, rinfo) => {
@@ -81,12 +79,12 @@ class MiSocket {
       length: msg.readUInt16BE(2),
       device_id: msg.readUInt32BE(8),
       stamp: msg.readUInt32BE(12),
-      checksum: msg.slice(16, 32).toString('hex')
-    }
+      checksum: msg.slice(16, 32).toString('hex'),
+    };
     const m = {
       header: header,
-      payload: header.length === 32 ? '<handshake>' : '<encrypted>'
-    }
+      payload: header.length === 32 ? '<handshake>' : '<encrypted>',
+    };
     return m;
   }
 
@@ -110,15 +108,19 @@ class MiSocket {
     this.transaction = newTransaction;
     return new Promise<MiTransaction>((resolve, reject) => {
       if (this.lastStamp === 0) {
-        const timeout = setTimeout(() => { reject('timeout'); }, 10000);
+        const timeout = setTimeout(() => {
+          reject('timeout'); 
+        }, 10000);
         this.socket.once('message', (msg, rinfo) => {
-        clearTimeout(timeout);
+          clearTimeout(timeout);
           try {
             const payload = this.decode(msg);
             if (payload.length !== 0) {
               reject(new Error('unexptected message; handshake expected'));
             }
-            setTimeout(() => { this.lastStamp = 0; }, 90000);
+            setTimeout(() => {
+              this.lastStamp = 0; 
+            }, 90000);
             resolve(newTransaction);
           } catch (err) {
             reject(err);
@@ -141,7 +143,9 @@ class MiSocket {
 
   send(buf) {
     return new Promise<any>((resolve, reject) => {
-      const timeout = setTimeout(() => { reject(new Error('timeout')); }, 10000);
+      const timeout = setTimeout(() => {
+        reject(new Error('timeout')); 
+      }, 10000);
       this.socket.once('message', (msg, rinfo) => {
         clearTimeout(timeout);
         try {
@@ -183,7 +187,7 @@ class MiSocket {
       .update(header.slice(0, 16))
       .update(this.token)
       .update(buf)
-      .digest()
+      .digest();
     digest.copy(header, 16);
     return Buffer.concat([header, buf]);
   }
@@ -223,7 +227,7 @@ export class MiDevice {
     address : string,
     port : number,
     token : string,
-    private readonly log: Logger
+    private readonly log: Logger,
   ) {
     // create token
     this.token = Buffer.from(token, 'hex');
@@ -232,8 +236,12 @@ export class MiDevice {
 
     // create socket
     this.socket = new MiSocket(address, port, this.token);
-    this.socket.on('error', (err) => { this.log.error(this.socket.name(), err.message); });
-    this.socket.on('debug', (msg) => { this.log.debug(this.socket.name(), msg); });
+    this.socket.on('error', (err) => {
+      this.log.error(this.socket.name(), err.message); 
+    });
+    this.socket.on('debug', (msg) => {
+      this.log.debug(this.socket.name(), msg); 
+    });
   }
 
   send(method, args) {
@@ -246,7 +254,7 @@ export class MiDevice {
         const request = {
           id: this.lastId,
           method: method,
-          params: args
+          params: args,
         };
         const json = JSON.stringify(request);
         transaction.request(this.encode(Buffer.from(json, 'utf8')))

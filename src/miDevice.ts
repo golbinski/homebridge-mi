@@ -109,9 +109,13 @@ class MiSocket {
     return new Promise<MiTransaction>((resolve, reject) => {
       if (this.lastStamp === 0) {
         const timeout = setTimeout(() => {
-          reject('timeout'); 
-        }, 10000);
+          // emitting error as message to remove event listener
+          this.socket.emit('message', new Error('request timed out: no handshake from device')); 
+        }, 1000);
         this.socket.once('message', (msg) => {
+          if (msg instanceof Error) {
+            return reject(msg);
+          }
           clearTimeout(timeout);
           try {
             const payload = this.decode(msg);
@@ -144,9 +148,13 @@ class MiSocket {
   send(buf) {
     return new Promise<Buffer>((resolve, reject) => {
       const timeout = setTimeout(() => {
-        reject(new Error('timeout')); 
-      }, 10000);
+        // emitting error as message to remove event listener
+        this.socket.emit('message', new Error('request timed out: no reply from device')); 
+      }, 5000);
       this.socket.once('message', (msg) => {
+        if (msg instanceof Error) {
+          return reject(msg);
+        }
         clearTimeout(timeout);
         try {
           const payload = this.decode(msg);
@@ -247,29 +255,41 @@ export class MiDevice {
   send(method, args) {
     return new Promise<any>((resolve, reject) => {  /* eslint-disable-line @typescript-eslint/no-explicit-any */
       this.socket.executeTransaction().then((transaction) => {
-        this.lastId += 1;
-        if (this.lastId >= 10000) {
-          this.lastId = 1;
-        }
-        const request = {
-          id: this.lastId,
-          method: method,
-          params: args,
-        };
-        const json = JSON.stringify(request);
-        transaction.request(this.encode(Buffer.from(json, 'utf8')))
+        transaction.request(this.encode_request(method, args))
           .then((encrypted) => {
             const response = this.decode(encrypted);
             this.log.debug(this.socket.name(), '<-', response);
             resolve(response.result);
           })
           .catch((err) => {
-            reject(err);
+            transaction.request(this.encode_request(method, args, 100))
+              .then((encrypted) => {
+                const response = this.decode(encrypted);
+                this.log.debug(this.socket.name(), '<-', response);
+                resolve(response.result);
+              })
+              .catch((nextErr) => {
+                reject(err);
+              });
           });
-        this.log.debug(this.socket.name(), '->', json);
       }); 
     });
   }     
+
+  private encode_request(method, args, step = 1) {
+    this.lastId += step;
+    if (this.lastId >= 10000) {
+      this.lastId = 1;
+    }
+    const request = {
+      id: this.lastId,
+      method: method,
+      params: args,
+    };
+    const json = JSON.stringify(request);
+    this.log.debug(this.socket.name(), '->', json);
+    return this.encode(Buffer.from(json, 'utf8'));
+  }
 
   private encode(buf: Buffer) {
     const cipher = crypto.createCipheriv('aes-128-cbc', this.tokenKey, this.tokenIV);

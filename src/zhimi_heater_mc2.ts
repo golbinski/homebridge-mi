@@ -60,24 +60,10 @@ export class zhimi_heater_mc2 extends MiAccessory {
       .setProps({
         validValues: [this.platform.Characteristic.TemperatureDisplayUnits.CELSIUS],
       });
+    this.updateCharacteristics();
   }
 
-  setActive(value: CharacteristicValue, callback: CharacteristicSetCallback) {
-    this.api.send('set_properties', [{did: 'power', siid: 2, piid: 1, value: value ? true : false}])
-      .then((result) => {
-        if (result[0].code === 0) {
-          callback(null);
-        } else {
-          callback(new Error(result[0].code as string));
-        }
-      })
-      .catch((err) => {
-        callback(err); 
-      });
-  }
-
-  getActive(callback: CharacteristicGetCallback) {
-    callback(null, this.power ? this.platform.Characteristic.Active.ACTIVE : this.platform.Characteristic.Active.INACTIVE);
+  updateCharacteristics() {
     this.api.send('get_properties', [
       {did: 'power', siid: 2, piid: 1},
       {did: 'target_temperature', siid: 2, piid: 5},
@@ -105,6 +91,25 @@ export class zhimi_heater_mc2 extends MiAccessory {
     }).catch((err) => {
       this.platform.log.error(err.message); 
     });
+  }
+
+  setActive(value: CharacteristicValue, callback: CharacteristicSetCallback) {
+    this.api.send('set_properties', [{did: 'power', siid: 2, piid: 1, value: value ? true : false}])
+      .then((result) => {
+        if (result[0].code === 0) {
+          callback(null);
+        } else {
+          callback(new Error(result[0].code as string));
+        }
+      })
+      .catch((err) => {
+        callback(err); 
+      });
+  }
+
+  getActive(callback: CharacteristicGetCallback) {
+    callback(null, this.power ? this.platform.Characteristic.Active.ACTIVE : this.platform.Characteristic.Active.INACTIVE);
+    this.updateCharacteristics();
   }
  
   setHeatingThresholdTemperature(value: CharacteristicValue, callback: CharacteristicSetCallback) {

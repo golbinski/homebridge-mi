@@ -81,7 +81,8 @@ export class MiPlatform implements DynamicPlatformPlugin {
       if (response.model === 'zhimi.heater.mc2') {
         new zhimi_heater_mc2(response, platform, accessory, device);
       } else {
-        platform.log.error('unknown device', response.result.model);
+        platform.log.error('Unregistering not supported device', response.result.model);
+        this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
       }
     });
   }

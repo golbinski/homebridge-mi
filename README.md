@@ -12,3 +12,4 @@ This is a Xiaomi platform plugin which address integration of Xiaomi Smart Home 
 
 Currently supported devices:
 * SMARTMI Smart Space Heater S (model:zhimi.heater.mc2)
+* SMARTMI Air Humidifier 2 (model: zhimi.humidifier.cb1)

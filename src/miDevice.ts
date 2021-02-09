@@ -61,6 +61,9 @@ class MiSocket {
   ) {
     this.socket = dgram.createSocket('udp4');
     this.socket.on('message', (msg) => {
+      if (msg instanceof Error) {
+        return;
+      }
       const m = this.dump(msg);
       this.deviceId = m.header.device_id;
       if (m.header.stamp > this.lastStamp) {
@@ -96,7 +99,11 @@ class MiSocket {
     return this.address + '@' + this.port.toString();
   }
 
-  executeTransaction() {
+  executeTransaction(handler) {
+    return this.openTransaction().then(handler);
+  }
+
+  openTransaction() {
     if (this.transaction !== null) {
       return new Promise<MiTransaction>((resolve) => {
         const currentTransaction = this.transaction as MiTransaction;
@@ -254,7 +261,7 @@ export class MiDevice {
 
   send(method, args) {
     return new Promise<any>((resolve, reject) => {  /* eslint-disable-line @typescript-eslint/no-explicit-any */
-      this.socket.executeTransaction().then((transaction) => {
+      this.socket.executeTransaction((transaction) => {
         transaction.request(this.encode_request(method, args))
           .then((encrypted) => {
             const response = this.decode(encrypted);

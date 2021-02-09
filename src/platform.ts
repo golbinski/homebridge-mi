@@ -3,7 +3,7 @@ import { API, DynamicPlatformPlugin, Logger, PlatformAccessory, PlatformConfig, 
 import { PLATFORM_NAME, PLUGIN_NAME } from './settings';
 import { MiAccessory } from './accessory';
 import { MiDevice } from './miDevice';
-import { zhimi_heater_mc2 } from './zhimi_heater_mc2';
+import { zhimi_heater_mc2, zhimi_humidifier } from './devices';
 
 export interface MiAccessoryConfig {
   displayName: string;
@@ -80,9 +80,11 @@ export class MiPlatform implements DynamicPlatformPlugin {
     device.send('miIO.info', []).then((response) => {
       if (response.model === 'zhimi.heater.mc2') {
         new zhimi_heater_mc2(response, platform, accessory, device);
+      } else if ( response.model === 'zhimi.humidifier.cb1') {
+        new zhimi_humidifier(response, platform, accessory, device);
       } else {
-        platform.log.error('Unregistering not supported device', response.result.model);
-        this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
+        platform.log.error('Unregistering not supported device', response.model);
+        platform.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
       }
     });
   }

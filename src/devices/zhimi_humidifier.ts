@@ -1,10 +1,10 @@
 import { PlatformAccessory, CharacteristicValue, CharacteristicSetCallback, CharacteristicGetCallback } from 'homebridge';
 
 import { MiPlatform } from '../platform';
-import { MiioAccessory } from '../accessory';
+import { MIIO, MiAccessory } from '../accessory';
 import { MiDevice } from '../miDevice';
 
-export class zhimi_humidifier extends MiioAccessory {
+export class zhimi_humidifier extends MiAccessory {
   constructor(
     info,
     platform: MiPlatform,
@@ -12,7 +12,7 @@ export class zhimi_humidifier extends MiioAccessory {
     api: MiDevice,
   ) {
     super(platform, accessory, api);
-    const service = this.addService(platform.Service.HumidifierDehumidifier, [
+    const service = this.addService(MIIO, platform.Service.HumidifierDehumidifier, [
       {
         did: 'power',
         state: 'off',
@@ -96,7 +96,7 @@ export class zhimi_humidifier extends MiioAccessory {
         ],
       }
     ]);
-    this.addService(platform.Service.TemperatureSensor, [
+    this.addService(MIIO, platform.Service.TemperatureSensor, [
       {
         did: 'temperature',
         state: 21,

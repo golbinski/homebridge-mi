@@ -15,10 +15,6 @@ interface MiOptions {
   devices: MiAccessoryConfig[];
 }
 
-export interface AccessoryFactory<P extends DynamicPlatformPlugin> {
-  (platform: P, accessory: PlatformAccessory): void;
-}
-
 /**
  * HomebridgePlatform
  * This class is the main constructor for your plugin, this is where you should
@@ -70,27 +66,37 @@ export class MiPlatform implements DynamicPlatformPlugin {
     this.accessories.push(accessory);
   }
 
-  createAccessory(platform: MiPlatform, accessory: PlatformAccessory) {
+  buildAccessory(accessory: PlatformAccessory) {
     const device = new MiDevice(
       accessory.context.device.ipAddress,
       54321,
       accessory.context.device.token,
-      platform.log,
+      this.log,
     );
-    device.send('miIO.info', []).then((response) => {
-      if (response.model === 'zhimi.heater.mc2') {
-        new zhimi_heater_mc2(response, platform, accessory, device);
-      } else if ( response.model === 'zhimi.humidifier.cb1') {
-        new zhimi_humidifier(response, platform, accessory, device);
+    if (accessory.context.info !== undefined) {
+      this.createAccessory(accessory, device);
+    } else {
+      device.send('miIO.info', []).then((response) => {
+        accessory.context.info = response;
+        this.api.updatePlatformAccessories([accessory]);
+        this.createAccessory(accessory, device);
+      });
+    }
+  }
+  
+  createAccessory(accessory: PlatformAccessory, device: MiDevice) {
+      if (accessory.context.info.model === 'zhimi.heater.mc2') {
+        new zhimi_heater_mc2(accessory.context.info, this, accessory, device);
+      } else if (accessory.context.info.model === 'zhimi.humidifier.cb1') {
+        new zhimi_humidifier(accessory.context.info, this, accessory, device);
       } else {
-        platform.log.error('Unregistering not supported device', response.model);
-        platform.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
+        this.log.error('Unregistering not supported device', accessory.context.info.model);
+        this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
       }
-    });
   }
 
   registerDevices() {
-    this.populateDevicesFromConfig(this.config.devices, this.createAccessory);
+    this.populateDevicesFromConfig(this.config.devices, this.buildAccessory.bind(this));
   }
 
   unregisterNotUsedDevices() {
@@ -107,8 +113,7 @@ export class MiPlatform implements DynamicPlatformPlugin {
     }
   }
 
-
-  populateDevicesFromConfig<DeviceConfig extends MiAccessoryConfig>(devices: DeviceConfig[], factory: AccessoryFactory<MiPlatform>) : void {
+  populateDevicesFromConfig<DeviceConfig extends MiAccessoryConfig>(devices: DeviceConfig[], factory) : void {
 
     for (const device of devices) {
 
@@ -126,7 +131,7 @@ export class MiPlatform implements DynamicPlatformPlugin {
         if (device) {
           this.log.info('Restoring existing accessory from cache:', existingAccessory.displayName);
           existingAccessory.context.device = device;
-          factory(this, existingAccessory);
+          factory(existingAccessory);
           // update accessory cache with any changes to the accessory details and information
           this.api.updatePlatformAccessories([existingAccessory]);
         } else if (!device) {
@@ -147,7 +152,7 @@ export class MiPlatform implements DynamicPlatformPlugin {
         accessory.context.device = device;
 
         // create the accessory handler for the newly create accessory
-        factory(this, accessory);
+        factory(accessory);
 
         // link the accessory to your platform
         this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);

@@ -275,7 +275,7 @@ export class MiDevice {
                 this.log.debug(this.socket.name(), '<-', response);
                 resolve(response.result);
               })
-              .catch((nextErr) => {
+              .catch(() => {
                 reject(err);
               });
           });

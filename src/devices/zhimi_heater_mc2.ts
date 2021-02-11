@@ -1,10 +1,10 @@
 import { PlatformAccessory, CharacteristicValue, CharacteristicSetCallback, CharacteristicGetCallback } from 'homebridge';
 
 import { MiPlatform } from '../platform';
-import { MiotAccessory } from '../accessory';
+import { MIOT, MiAccessory } from '../accessory';
 import { MiDevice } from '../miDevice';
 
-export class zhimi_heater_mc2 extends MiotAccessory {
+export class zhimi_heater_mc2 extends MiAccessory {
   constructor(
     info,
     platform: MiPlatform,
@@ -12,7 +12,7 @@ export class zhimi_heater_mc2 extends MiotAccessory {
     api: MiDevice,
   ) {
     super(platform, accessory, api);
-    const service = this.addService(platform.Service.HeaterCooler, [
+    const service = this.addService(MIOT, platform.Service.HeaterCooler, [
       {
         did: 'power',
         siid: 2,

@@ -94,6 +94,41 @@ export class zhimi_humidifier extends MiAccessory {
             },
           }
         ],
+      },
+      {
+        did: 'mode',
+        state: 'auto',
+        characteristics: [
+          {
+            characteristic: platform.Characteristic.RotationSpeed,
+            events: ['get', 'set'],
+            props: {
+              minStep: 10
+            },
+            formatDeviceValue: (value) => {
+              if (value === "silent") {
+                return 10;
+              } else if (value === "medium") {
+                return 50;
+              } else if (value === "high") {
+                return 100;
+              }
+              return 0;
+            },
+            formatCharacteristicValue: (value) => {
+              if (value == 0) {
+                return 'auto';
+              } else if (value <= 10) {
+                return 'silent';
+              } else if (value < 100) {
+                return 'medium';
+              } else if (value == 100) {
+                return 'high';
+              }
+              return 'auto';
+            },
+          }
+        ],
       }
     ]);
     this.addService(MIIO, platform.Service.TemperatureSensor, [

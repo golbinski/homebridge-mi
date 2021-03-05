@@ -118,7 +118,7 @@ class MiSocket {
         const timeout = setTimeout(() => {
           // emitting error as message to remove event listener
           this.socket.emit('message', new Error('request timed out: no handshake from device')); 
-        }, 1000);
+        }, 4000);
         this.socket.once('message', (msg) => {
           if (msg instanceof Error) {
             return reject(msg);
